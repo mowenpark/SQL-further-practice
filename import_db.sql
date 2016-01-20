@@ -79,4 +79,5 @@ question_likes (upvote, question_id, user_id)
 VALUES
 (1, 1, 2),
 (1, 2, 1),
-(1, 1, 1);
+(1, 1, 1),
+(1, 1, 2);

@@ -54,6 +54,19 @@ class Users
     QuestionLikes.liked_questions_for_user_id(@id)
   end
 
+  def average_karma
+    data = QuestionsDatabase.instance.execute(<<-SQL)
+    SELECT
+    COUNT(upvote)
+    FROM
+    question_likes
+    JOIN questions ON question_id = questions.id
+    WHERE author_id = '#{@id}'
+    SQL
+    # debugger
+    data[0]["COUNT(upvote)"] / authored_questions.count 
+  end
+
 end
 
 class Questions
@@ -67,6 +80,10 @@ class Questions
 
   def self.most_followed(n)
     QuestionFollows.most_followed_questions(n)
+  end
+
+  def self.most_liked(n)
+    QuestionLikes.most_liked_questions(n)
   end
 
   attr_accessor :title, :body, :id, :author_id
@@ -251,6 +268,21 @@ class QuestionLikes
     SQL
     data.map { |datum| Questions.find_by_id(datum["question_id"]) }
   end
+
+  def self.most_liked_questions(n)
+    data = QuestionsDatabase.instance.execute(<<-SQL)
+    SELECT
+    question_likes.question_id, COUNT(*)
+    FROM
+    question_likes
+    GROUP BY
+    question_likes.question_id
+    ORDER BY
+    COUNT(*) DESC
+    SQL
+    data[0...n]
+  end
+
 
   attr_accessor :id, :upvote, :question_id, :user_id
 
